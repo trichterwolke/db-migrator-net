@@ -64,7 +64,6 @@ namespace NeosIT.DB_Migrator.DBMigration.Target.PostgreSQL
 
             proc.StartInfo.UseShellExecute = false;
             proc.StartInfo.RedirectStandardError = true;
-            //proc.StartInfo.RedirectStandardInput = true;
             proc.StartInfo.RedirectStandardOutput = true;
 
             proc.Start();

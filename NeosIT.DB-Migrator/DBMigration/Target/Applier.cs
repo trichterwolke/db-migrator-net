@@ -8,9 +8,12 @@ namespace NeosIT.DB_Migrator.DBMigration.Target
 {
     public abstract class Applier
     {
-        protected Log log = new Log();
+        protected Log Log { get; private set; } = new Log();
 
-        protected StreamWriter streamWriter;
+        protected StreamWriter StreamWriter { get; private set; }
+
+      
+
         public Encoding FileEncoding { get; set; }
         public string Filename { get; protected set; }
         public int TotalMigrations { get; protected set; }
@@ -18,24 +21,27 @@ namespace NeosIT.DB_Migrator.DBMigration.Target
         /// <summary>
         /// Initialies the output file
         /// </summary>
-        public virtual void Begin()
+        public virtual void Begin(bool withTransaction)
         {
             try
             {
                 Filename = new FileInfo("migration_" + Path.GetRandomFileName() + ".sql").FullName;
-                streamWriter = new StreamWriter(Filename, false, FileEncoding);
+                StreamWriter = new StreamWriter(Filename, false, FileEncoding);
 
                 TotalMigrations = 0;
-                log.Info(String.Format("output will be written to {0}", Filename), "migration");
+                Log.Info(String.Format("output will be written to {0}", Filename), "migration");
 
-                streamWriter.WriteLine("-- migration file was created at {0}", DateTime.Now);
-                streamWriter.WriteLine(
+                StreamWriter.WriteLine("-- migration file was created at {0}", DateTime.Now);
+                StreamWriter.WriteLine(
                     "-- all migrations are concated to one big transaction so that a consistent state will be reached after finishing the migration");
-                AppendBeginTransaction();
+                if (withTransaction)
+                {
+                    AppendBeginTransaction();
+                }
             }
             catch (Exception e)
             {
-                log.Error(String.Format("Sorry, but a temporary file could not be created: {0}", e.Message));
+                Log.Error(String.Format("Sorry, but a temporary file could not be created: {0}", e.Message));
             }
         }
         
@@ -55,7 +61,7 @@ namespace NeosIT.DB_Migrator.DBMigration.Target
                 ++TotalMigrations;
                 SqlFileInfo file = unappliedMigrations[version];
 
-                log.Info(String.Format("{0} / {1} {2} scheduled for applying", TotalMigrations, size,
+                Log.Info(String.Format("{0} / {1} {2} scheduled for applying", TotalMigrations, size,
                                   file.FileInfo.Name), "migration");
 
                 string[] content = File.ReadAllLines(file.FileInfo.FullName);
@@ -63,7 +69,7 @@ namespace NeosIT.DB_Migrator.DBMigration.Target
 
                 foreach (string line in content)
                 {
-                    streamWriter.WriteLine(line);
+                    StreamWriter.WriteLine(line);
                 }
 
                 AfterMigrationFile(version, file);
@@ -80,7 +86,7 @@ namespace NeosIT.DB_Migrator.DBMigration.Target
         /// <param name="file"></param>
         public virtual void BeforeMigrationFile(Version version, SqlFileInfo file)
         {
-            streamWriter.WriteLine("-- db-migrator:FILE: {0}", file.FileInfo.Name);
+            StreamWriter.WriteLine("-- db-migrator:FILE: {0}", file.FileInfo.Name);
         }
 
         /// <summary>
@@ -92,7 +98,7 @@ namespace NeosIT.DB_Migrator.DBMigration.Target
         {
             if (file.SqlInsertMigration)
             {
-                streamWriter.WriteLine("INSERT INTO migrations (major, minor, filename) VALUES('{0}', '{1}', '{2}');",
+                StreamWriter.WriteLine("INSERT INTO migrations (major, minor, filename) VALUES('{0}', '{1}', '{2}');",
                              version.Major, version.Minor, file.FileInfo.Name);
             }
         }
@@ -100,11 +106,14 @@ namespace NeosIT.DB_Migrator.DBMigration.Target
         /// <summary>
         /// Is executed after copying every migration file to output file
         /// </summary>
-        public virtual void Commit()
+        public virtual void Commit(bool withTransaction)
         {
-            AppendCommitTransaction();
+            if (withTransaction)
+            {
+                AppendCommitTransaction();
+            }
 
-            streamWriter.Dispose();
+            StreamWriter.Dispose();
         }
 
         /// <summary>
@@ -117,7 +126,7 @@ namespace NeosIT.DB_Migrator.DBMigration.Target
                 File.Delete(Filename);
             }
 
-            log.Info("Temporary file containing all statements deleted", "cleanup");
+            Log.Info("Temporary file containing all statements deleted", "cleanup");
         }
 
         public virtual void AppendBeginTransaction()

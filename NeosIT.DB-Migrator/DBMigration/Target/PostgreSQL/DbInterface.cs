@@ -30,7 +30,7 @@ namespace NeosIT.DB_Migrator.DBMigration.Target.PostgreSQL
         {
             try
             {
-                IList<string> lines = Executor.ExecCommand(SqlLatestMigration).Split(new[] {'\n',});
+                IList<string> lines = Executor.ExecCommand(SqlLatestMigration).Split(new[] { '\n', });
                 string major = "0";
                 string minor = "0";
 
@@ -49,7 +49,7 @@ namespace NeosIT.DB_Migrator.DBMigration.Target.PostgreSQL
                     }
                 }
 
-                var r = new Version {Major = major, Minor = minor,};
+                var r = new Version { Major = major, Minor = minor, };
 
                 return r;
             }
@@ -62,7 +62,7 @@ namespace NeosIT.DB_Migrator.DBMigration.Target.PostgreSQL
                     throw new Exception("Could not filter output");
                 }
 
-                if (Regex.Match(e.Message.Split(new[] {'\n'})[0], "(.*)relation(.*)does not exist").Success)
+                if (Regex.Match(e.Message.Split(new[] { '\n' })[0], "(.*)relation(.*)does not exist").Success)
                 {
                     log.Warn("Migrations table does not exist... creating");
 

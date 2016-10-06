@@ -4,12 +4,12 @@
     {
         public override void AppendBeginTransaction()
         {
-            streamWriter.WriteLine("BEGIN;");
+            StreamWriter.WriteLine("BEGIN;");
         }
 
         public override void AppendCommitTransaction()
         {
-            streamWriter.WriteLine("COMMIT;");
+            StreamWriter.WriteLine("COMMIT;");
         }
     }
 }

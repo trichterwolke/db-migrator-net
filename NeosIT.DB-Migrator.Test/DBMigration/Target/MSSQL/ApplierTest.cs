@@ -17,12 +17,12 @@ namespace NeosIT.DB_Migrator.Test.DBMigration.Target.MSSQL
 {
     public class ApplierMockTest : NeosIT.DB_Migrator.DBMigration.Target.MSSQL.Applier
     {
-        public override void Commit()
+        public override void Commit(bool withTransaction)
         {
             // Ignore writing to file
             AppendCommitTransaction();
 
-            Sw.Dispose();
+            StreamWriter.Dispose();
         }
     }
 
@@ -54,9 +54,9 @@ namespace NeosIT.DB_Migrator.Test.DBMigration.Target.MSSQL
             Assert.AreEqual(2, r.Count);
 
             ApplierMockTest applier = new ApplierMockTest();
-            applier.Begin();
+            applier.Begin(true);
             applier.Prepare(r);
-            applier.Commit();
+            applier.Commit(true);
             string[] content = File.ReadAllLines(applier.Filename);
 
             Assert.NotNull(content);

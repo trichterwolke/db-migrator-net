@@ -51,7 +51,7 @@ namespace NeosIT.DB_Migrator.DBMigration
 
             log.Debug(String.Format("current working dir: {0}", Environment.CurrentDirectory), "migration");
 
-            IList<string> dirs = _directories.Split(new[] {_separatorPath,}, StringSplitOptions.None);
+            IList<string> dirs = _directories.Split(new[] { _separatorPath, }, StringSplitOptions.None);
 
             if (ReferenceVersion == null)
             {
@@ -68,7 +68,7 @@ namespace NeosIT.DB_Migrator.DBMigration
             {
                 stack.Add(CreateDirElement(pathdef));
             }
-
+            
             Dictionary<Version, SqlFileInfo> mergedMigrations = MergeMigrationsFromDirectories(stack, ReferenceVersion);
 
             if (0 == mergedMigrations.Count)
@@ -77,39 +77,53 @@ namespace NeosIT.DB_Migrator.DBMigration
                 return;
             }
 
-            Applier.Begin();
-            Applier.Prepare(mergedMigrations);
+            var sortedMigations = SortIntoWithAndWithoutTransaction(mergedMigrations);
+            foreach (var sorted in sortedMigations)
+            {
+                if (!ApplyBatch(sorted))
+                {
+                    break;
+                }
+            }
+        }
+
+        private bool ApplyBatch(Dictionary<Version, SqlFileInfo> migrationBatch)
+        {
+            bool success = true;
+            bool withTransaction = !migrationBatch.First().Value.NoTransaction;
+
+            Applier.Begin(withTransaction);
+            Applier.Prepare(migrationBatch);
 
             bool removeFile = !KeepTemporaryFile;
 
             try
             {
-                Applier.Commit();
+                Applier.Commit(withTransaction);
 
                 if (OnlySimulate)
                 {
-                    log.Success(String.Format("{0} migrations would be applied - if not running a simulation", Applier.TotalMigrations), "migration");
+                    log.Success(string.Format("{0} migrations would be applied - if not running a simulation", Applier.TotalMigrations), "migration");
                 }
                 else
                 {
                     Console.WriteLine(DbInterface.Executor.ExecFile(Applier.Filename));
-                    log.Success(String.Format("{0} migrations applied. Project is now up-to-date :-)",
-                                      Applier.TotalMigrations), "migration");
+                    log.Success(string.Format("{0} migrations applied. Project is now up-to-date :-)", Applier.TotalMigrations), "migration");
                 }
             }
             catch (Exception e)
             {
-                log.Error(String.Format("Migration failed: {0}", e.Message), "migration");
+                success = false;
+                log.Error(string.Format("Migration failed: {0}", e.Message), "migration");
 
                 if (DbInterface.Executor.HasMethod("GetLinenumberOfError"))
                 {
                     MethodInfo method = DbInterface.Executor.GetMethod("GetLinenumberOfError");
-                    var errorInLine = (int) method.Invoke(this, new object[] {e.Message,});
+                    var errorInLine = (int)method.Invoke(this, new object[] { e.Message, });
 
-                    SqlStacktrace stacktrace = GetSqlStacktrace(File.ReadAllLines(Applier.Filename), (errorInLine - 1),
-                                                                5, 2);
+                    SqlStacktrace stacktrace = GetSqlStacktrace(File.ReadAllLines(Applier.Filename), (errorInLine - 1), 5, 2);
 
-                    log.Debug(String.Format("error occured somewhere in file: {0}", stacktrace.File.FileInfo.FullName));
+                    log.Debug(string.Format("error occured somewhere in file: {0}", stacktrace.File.FileInfo.FullName));
                     log.Debug("... lines of aggregated SQL script ...");
 
                     int curLine = stacktrace.BeginLine;
@@ -133,9 +147,11 @@ namespace NeosIT.DB_Migrator.DBMigration
             }
             else
             {
-                log.Error(String.Format("SQL-script has not been deleted for debugging purposes ({0})",
-                                  Applier.Filename));
+                log.Error(String.Format("SQL-script has not been deleted for debugging purposes ({0})", Applier.Filename));
+
             }
+
+            return success;
         }
 
         public SqlStacktrace GetSqlStacktrace(IList<string> lines, int idx, int linesBefore, int linesAfter)
@@ -170,18 +186,37 @@ namespace NeosIT.DB_Migrator.DBMigration
             }
 
             return new SqlStacktrace
-                       {
-                           BeginLine = beginLine,
-                           File =
-                               string.IsNullOrEmpty(referenceFile)
-                                   ? null
-                                   : new SqlFileInfo {FileInfo = new FileInfo(referenceFile),},
-                           Lines = output,
-                       };
+            {
+                BeginLine = beginLine,
+                File =
+                    string.IsNullOrEmpty(referenceFile)
+                        ? null
+                        : new SqlFileInfo { FileInfo = new FileInfo(referenceFile), },
+                Lines = output,
+            };
         }
 
-        public Dictionary<Version, SqlFileInfo> MergeMigrationsFromDirectories(IList<SqlDirInfo> directories,
-                                                                               Version version)
+        public IEnumerable<Dictionary<Version, SqlFileInfo>> SortIntoWithAndWithoutTransaction(Dictionary<Version, SqlFileInfo> migrations)
+        {
+            var result = new List<Dictionary<Version, SqlFileInfo>>();
+            var current = new Dictionary<Version, SqlFileInfo>();
+            //bool notran = null;
+            foreach (var migarion in migrations.OrderBy(x => x.Key.GetVersion()))
+            {
+                if (current.Any() && migarion.Value.NoTransaction != current.First().Value.NoTransaction)
+                {
+                    result.Add(current);
+                    current = new Dictionary<Version, SqlFileInfo>();
+                }
+                current.Add(migarion.Key, migarion.Value);
+            }
+
+            result.Add(current);
+            return result;
+        }
+
+        public Dictionary<Version, SqlFileInfo> MergeMigrationsFromDirectories(IList<SqlDirInfo> directories, Version version)
+
         {
             var r = new Dictionary<Version, SqlFileInfo>();
 
@@ -229,7 +264,7 @@ namespace NeosIT.DB_Migrator.DBMigration
 
         public SqlDirInfo CreateDirElement(string pathdef)
         {
-            string[] opts = pathdef.Split(new[] {_separatorOpts,}, StringSplitOptions.None);
+            string[] opts = pathdef.Split(new[] { _separatorOpts, }, StringSplitOptions.None);
             DirectoryInfo dir = LocateMigrationDir(opts[0]);
 
             bool latestOnly = false;
@@ -244,7 +279,7 @@ namespace NeosIT.DB_Migrator.DBMigration
 
                 if (opts.Length >= 3)
                 {
-                    string[] array = {"1", "true", "enabled", "on", "yes", "y"};
+                    string[] array = { "1", "true", "enabled", "on", "yes", "y" };
                     if (array.Contains(opts[2]))
                     {
                         sqlInsertMigration = true;
@@ -253,12 +288,12 @@ namespace NeosIT.DB_Migrator.DBMigration
             }
 
             return new SqlDirInfo
-                       {
-                           DirectoryInfo = dir,
-                           Files = null,
-                           LatestOnly = latestOnly,
-                           SqlInsertMigration = sqlInsertMigration,
-                       };
+            {
+                DirectoryInfo = dir,
+                Files = null,
+                LatestOnly = latestOnly,
+                SqlInsertMigration = sqlInsertMigration,
+            };
         }
 
         public DirectoryInfo LocateMigrationDir(string dir)
