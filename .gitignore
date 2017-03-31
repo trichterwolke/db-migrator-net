@@ -17,8 +17,14 @@ Thumbs.db
 *.cache
 *.ilk
 *.log
-[Bb]in
-[Dd]ebug*/
+*.user
+**/*.Cache
+*.suo
+src/**/bin/**/*
+src/**/obj/**/*
+src/packages/**/*
+
+
 *.lib
 *.sbr
 obj/
