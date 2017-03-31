@@ -2,7 +2,7 @@
 
 namespace NeosIT.DBMigrator.DBMigration.Parsers
 {
-    public class Factory
+    public static class Factory
     {
         public static AbstractParser Create(string[] args)
         {

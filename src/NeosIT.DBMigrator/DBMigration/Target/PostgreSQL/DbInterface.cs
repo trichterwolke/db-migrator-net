@@ -36,11 +36,13 @@ namespace NeosIT.DBMigrator.DBMigration.Target.PostgreSQL
 
                 if (lines.Count >= 4)
                 {
+                    // Durch den umstieg von osql auf sqlcmd muss möglicherweise das erste \s+ durch \s* ersetzt werden
                     if (!Regex.Match(lines[0], @"\s+" + SqlMajorCol + @"\s+\|\s+" + SqlMinorCol + @"\s+").Success)
                     {
                         throw new FilterException();
                     }
 
+                    // Durch den umstieg von osql auf sqlcmd muss möglicherweise das erste \s+ durch \s* ersetzt werden
                     Match match = Regex.Match(lines[2], @"\s+(\d*)\s+\|\s+(\d*)\s*");
                     if (match.Success)
                     {

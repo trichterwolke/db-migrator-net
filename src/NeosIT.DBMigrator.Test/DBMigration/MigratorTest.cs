@@ -11,7 +11,7 @@ namespace NeosIT.DBMigrator.Test.DBMigration
     
     public class MigratorTest
     {
-        private Migrator _migrator;
+        private readonly Migrator _migrator;
 
         public MigratorTest()
         {
@@ -43,8 +43,6 @@ namespace NeosIT.DBMigrator.Test.DBMigration
             {
                 Assert.True(e.Message.Contains("is not valid"));
             }
-
-            //Assert.Throws(typeof(FileNotFoundException), () => _migrator.CreateDirElement(opts));
         }
 
         [Fact]

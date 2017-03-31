@@ -6,9 +6,19 @@ using NeosIT.DBMigrator.DBMigration.Options;
 
 namespace NeosIT.DBMigrator
 {
-    class Program
+    public static class Program
     {
-        static void Main(string[] args)
+        private static bool isUnitTest;
+
+        internal static bool IsUnitTest => isUnitTest;
+
+        internal static void Main(string[] args, bool isUnitTest)
+        {
+            Program.isUnitTest = isUnitTest;
+            Main(args);
+        }
+
+        public static void Main(string[] args)
         {
             Log log = new Log();
 
@@ -23,6 +33,11 @@ namespace NeosIT.DBMigrator
             {
                 Console.Write(GetHelp(parser));
                 log.Error("Could not continue: " + ex.Message);
+
+                if (isUnitTest)
+                {
+                    throw;
+                }
                 Exit(1);
             }
 
@@ -34,6 +49,11 @@ namespace NeosIT.DBMigrator
             {
                 Console.Write(GetHelp(parser));
                 log.Error("Error: " + ex.Message);
+
+                if (isUnitTest)
+                {
+                    throw;
+                }
                 Exit(1);
             }
 
@@ -47,18 +67,23 @@ namespace NeosIT.DBMigrator
 
         private static string GetHelp(AbstractParser parser)
         {
-            if (parser != null && parser.CurrentOptions != null) {
+            if (parser != null && parser.CurrentOptions != null)
+            {
                 return parser.CurrentOptions.Help();
             }
 
             return new DefaultOptions().Help();
         }
 
+
         private static void Exit(int code)
         {
             Console.ResetColor();
             Console.ForegroundColor = ConsoleColor.Gray;
+
             Environment.Exit(code);
+
+
         }
     }
 }

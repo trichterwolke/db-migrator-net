@@ -7,55 +7,25 @@ namespace NeosIT.DBMigrator.DBMigration.Target.MySQL
 {
     public class Executor : IExecutor
     {
-        private Log log = new Log();
-        private string _args = "";
-        private string _command = "mysql";
-        private string _database = "";
-        private string _host = "localhost";
-        private string _password = "";
-        private string _username = "root";
+        private readonly Log log = new Log();
 
         #region IExecutor Members
 
-        public string Command
-        {
-            get { return _command; }
-            set { _command = value; }
-        }
+        public string Command { get; set; } = "mysql";
 
-        public string Host
-        {
-            get { return _host; }
-            set { _host = value; }
-        }
+        public string Host { get; set; } = "localhost";
 
-        public string Database
-        {
-            get { return _database; }
-            set { _database = value; }
-        }
+        public string Database { get; set; } = "";
 
-        public string Username
-        {
-            get { return _username; }
-            set { _username = value; }
-        }
+        public string Username { get; set; } = "root";
 
-        public string Password
-        {
-            get { return _password; }
-            set { _password = value; }
-        }
+        public string Password { get; set; } = "";
 
-        public string Args
-        {
-            get { return _args; }
-            set { _args = value; }
-        }
+        public string Args { get; set; } = "";
 
         public string Exec(string cmdArgs)
         {
-            log.Debug(String.Format("executing {0} {1}", _command, cmdArgs), "exec");
+            log.Debug(string.Format("executing {0} {1}", Command, cmdArgs), "exec");
 
             var proc = new Process();
             proc.StartInfo = new ProcessStartInfo(Command);
@@ -63,7 +33,6 @@ namespace NeosIT.DBMigrator.DBMigration.Target.MySQL
 
             proc.StartInfo.UseShellExecute = false;
             proc.StartInfo.RedirectStandardError = true;
-            //proc.StartInfo.RedirectStandardInput = true;
             proc.StartInfo.RedirectStandardOutput = true;
 
             proc.Start();
@@ -145,10 +114,5 @@ namespace NeosIT.DBMigrator.DBMigration.Target.MySQL
         }
 
         #endregion
-
-        /*public int GetLinenumberOfError(string error)
-        {
-            return 0;
-        }*/
     }
 }

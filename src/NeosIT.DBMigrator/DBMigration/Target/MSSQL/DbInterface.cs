@@ -30,18 +30,19 @@ namespace NeosIT.DBMigrator.DBMigration.Target.MSSQL
         {
             try
             {
-                IList<string> lines = Executor.ExecCommand(SqlLatestMigration).Split(new[] {'\n',});
+                IList<string> lines = Executor.ExecCommand(SqlLatestMigration).Split(new[] { '\r','\n' }, StringSplitOptions.RemoveEmptyEntries);
                 string major = "0";
                 string minor = "0";
 
-                if (lines.Count >= 5)
+                if (lines.Count >= 4)
                 {
-                    if (!Regex.Match(lines[0], @"\s+" + SqlMajorCol + @"\s+" + SqlMinorCol).Success)
+                    string pattern = @"\s*" + SqlMajorCol + @"\s+" + SqlMinorCol;
+                    if (!Regex.Match(lines[0], pattern).Success)
                     {
                         throw new FilterException();
                     }
 
-                    Match match = Regex.Match(lines[2], @"\s+(\d*)\s+(\d+)\s+");
+                    Match match = Regex.Match(lines[2], @"\s*(\d*)\s+(\d+)\s+");
 
                     if (match.Success)
                     {
@@ -50,20 +51,18 @@ namespace NeosIT.DBMigrator.DBMigration.Target.MSSQL
                     }
                 }
 
-                var r = new Version {Major = major, Minor = minor,};
-
-                return r;
+                return new Version {Major = major, Minor = minor};            
             }
             catch (Exception e)
             {
-                log.Error(String.Format("could not retrieve latest revision from database: {0}", e.Message));
+                log.Error(string.Format("could not retrieve latest revision from database: {0}", e.Message));
 
                 if (e is FilterException)
                 {
                     throw new Exception("Could not filter output");
                 }
 
-                log.Warn("Creatíng migrations table ...");
+                log.Warn("Creating migrations table ...");
 
                 try
                 {

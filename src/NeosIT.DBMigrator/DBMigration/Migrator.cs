@@ -60,8 +60,6 @@ namespace NeosIT.DBMigrator.DBMigration
 
             log.Info(String.Format("current installed migration: {0}", ReferenceVersion.ToString()), "migration");
 
-            Version useVersion = ReferenceVersion;
-
             IList<SqlDirInfo> stack = new List<SqlDirInfo>();
 
             foreach (string pathdef in dirs)
@@ -137,7 +135,7 @@ namespace NeosIT.DBMigrator.DBMigration
                 }
 
                 removeFile = false;
-
+      
                 Environment.ExitCode = 1;
             }
 

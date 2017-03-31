@@ -30,12 +30,6 @@ namespace NeosIT.DBMigrator.DBMigration.Options
         [Option("s", "strategy", HelpText = "can be \"flat\" or \"hierarchial\". flat means, that all scripts must be available inside this directory in form of yyyymmdd[-|_]<migration-number>-<name>.suffix. \"hierarchial\" means a directory structure in form of <major>\\<minor>\\<migration-number>[-|_]<name>.suffix")]
         public virtual string Strategy { get; set; }
 
-//        [Option("i", "ini", HelpText = "An .ini file from which to read all relevant settings")]
-//        public virtual string IniFile { get; set; } 
-
-//        [Option("x", "section", HelpText = "Name of the section in which to look for")]
-//        public virtual string IniSection { get; set; }
-
         [Option("t", "target", HelpText = "Target SQL system (can be MSSQL, MySQL or PostgreSQL", Required = true)]
         public string Target { get; set; }
 

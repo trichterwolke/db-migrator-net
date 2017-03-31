@@ -9,8 +9,8 @@
     <ProjectGuid>{C6249B3D-0EC2-405A-A89F-1F31B93D7249}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NeosIT.DB_Migrator.Test</RootNamespace>
-    <AssemblyName>NeosIT.DB-Migrator.Test</AssemblyName>
+    <RootNamespace>NeosIT.DBMigrator.Test</RootNamespace>
+    <AssemblyName>NeosIT.DBMigrator.Test</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -75,6 +75,7 @@
     <Compile Include="DBMigration\Target\MySQL\ParserTest.cs" />
     <Compile Include="DBMigration\Target\PostgreSQL\ExecutorTest.cs" />
     <Compile Include="DBMigration\Target\PostgreSQL\ParserTest.cs" />
+    <Compile Include="ProgramTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

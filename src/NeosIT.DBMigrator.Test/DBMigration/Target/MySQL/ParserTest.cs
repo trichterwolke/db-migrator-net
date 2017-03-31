@@ -2,15 +2,14 @@
 using NeosIT.DBMigrator.DBMigration.Parsers;
 using NeosIT.DBMigrator.DBMigration.Parsers.MySQL;
 using NeosIT.DBMigrator.DBMigration.Strategy;
-using NeosIT.DBMigrator.DBMigration.Target.MySQL;
 using Xunit;
 
 namespace NeosIT.DBMigrator.Test.DBMigration.Target.MySQL
 {
-    
+
     public class ParserTest
     {
-        private AbstractParser _parser;
+        private readonly AbstractParser _parser;
         public ParserTest()
         {
             _parser = new Parser();

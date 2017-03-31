@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Text.RegularExpressions;
 using Xunit;
-using System.Text.RegularExpressions;
 
 namespace NeosIT.DBMigrator.Test.DBMigration.Target.MSSQL
 {

@@ -19,13 +19,12 @@ namespace NeosIT.DBMigrator.DBMigration.Parsers
 
             migrator.Strategy = Strategy.Factory.Create(CurrentOptions.Strategy);
             
-
             return migrator;
         }
 
         public virtual Migrator InitMigrator(Migrator migrator)
         {
-            throw new Exception("InitMigrator() must be overwritten!");
+            throw new InvalidOperationException("InitMigrator() must be overwritten!");
         }
 
         public virtual string GetAdditionalHeader()
